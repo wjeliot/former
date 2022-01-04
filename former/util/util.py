@@ -3,8 +3,6 @@ import torch, os, time, math, tqdm, random, sys, gzip
 import torch.nn.functional as F
 import torch.distributions as dist
 
-from torch.utils.tensorboard import SummaryWriter
-
 import numpy as np
 
 def enwik8(path=None, n_train=int(90e6), n_valid=int(5e6), n_test=int(5e6)):
@@ -201,7 +199,7 @@ LOG2E = math.log2(math.e)
 LOGE2 = math.log(2.0)
 
 def compute_compression(model, data, context, batch_size, verbose=False,
-                        tbw:SummaryWriter=None, tok=None, skip=0):
+                        tbw=None, tok=None, skip=0):
 
 
     """

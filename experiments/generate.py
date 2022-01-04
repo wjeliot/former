@@ -12,8 +12,6 @@ import torch.distributions as dist
 import numpy as np
 
 from argparse import ArgumentParser
-from torch.utils.tensorboard import SummaryWriter
-
 import random, tqdm, sys, math, gzip
 
 # NB, the enwik8 data contains tokens from 9 to 240, but well round up to the nearest
@@ -131,8 +129,6 @@ def go(arg):
     else:
         torch.manual_seed(arg.seed)
 
-    tbw = SummaryWriter(log_dir=arg.tb_dir) # Tensorboard logging
-
     # load the data (validation unless arg.final is true, then test)
     arg.data = here('data/enwik8.gz') if arg.data is None else arg.data
 
@@ -172,9 +168,6 @@ def go(arg):
         # Compute the loss
         loss = F.nll_loss(output.transpose(2, 1), target, reduction='mean')
 
-        tbw.add_scalar('transformer/train-loss', float(loss.item()) * util.LOG2E, i * arg.batch_size, instances_seen)
-        tbw.add_scalar('transformer/time-forward', t, instances_seen)
-
         loss.backward() # backward pass
 
         # clip gradients
@@ -212,7 +205,6 @@ def go(arg):
                 #    training.
 
                 print(f'epoch{i}: {bits_per_byte:.4} bits per byte')
-                tbw.add_scalar(f'transformer/eval-loss', bits_per_byte, i * arg.batch_size, instances_seen)
                 # -- 0.9 bit per byte is around the state of the art.
 
 if __name__ == "__main__":
@@ -224,12 +216,12 @@ if __name__ == "__main__":
                         dest="num_batches",
                         help="Number of batches to train on. Each batch contains randomly sampled subsequences of the data."
                              "Default is set to a very large value so you can keep running until the output looks good. ",
-                        default=1_000_000, type=int)
+                        default=400, type=int)
 
     parser.add_argument("-b", "--batch-size",
                         dest="batch_size",
                         help="The batch size.",
-                        default=32, type=int)
+                        default=40, type=int)
 
     parser.add_argument("-D", "--data", dest="data",
                         help="Data file. Will be read as a string of 8-bit characters.",
